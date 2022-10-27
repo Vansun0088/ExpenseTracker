@@ -1,11 +1,14 @@
 import { Dimensions, StyleSheet, Text, View } from "react-native";
-import { GestureDetector } from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 
 const screenHeight = Dimensions.get("window").height;
 function BottomSheet() {
+  const gesture = Gesture.Pan().onUpdate((event) => {
+    console.log(event.translationY);
+  });
   return (
-    <GestureDetector>
+    <GestureDetector gesture={gesture}>
       <Animated.View style={styles.bottomSheetContainer}>
         <View style={styles.line}></View>
       </Animated.View>
