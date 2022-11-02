@@ -1,13 +1,23 @@
-import { Pressable, View, StyleSheet, Modal, Text } from "react-native";
+import { Pressable, View, StyleSheet, Modal, Text, SafeAreaView } from "react-native";
+import { useState } from "react";
 
-function ModalScreen({ setModal, modal }) {
-  function modalVisibilityHandler() {
+import ModalAlert from "./ModalAlert";
+import ButtonBackground from "../Styles/ButtonBackground";
+
+function ModalScreen({ setModal, modal, addItemHandler }) {
+  const [AlertVisibility, setAvertVisibility] = useState("none");
+
+  function CancelModalHandler() {
     setModal(false);
+  }
+
+  function AddModalHandler() {
+    setAvertVisibility("flex");
   }
 
   return (
     <Modal animationType="slide" visible={modal}>
-      <View style={styles.rootContainer}>
+      <SafeAreaView style={styles.rootContainer}>
         <View style={styles.lineContainer}>
           <Text style={styles.lineText}>Add Expense</Text>
         </View>
@@ -15,26 +25,22 @@ function ModalScreen({ setModal, modal }) {
           <View style={styles.buttonCancel}>
             <Pressable
               style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-              onPress={modalVisibilityHandler}
+              onPress={CancelModalHandler}
             >
               <View style={styles.textButtonContainer}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </View>
             </Pressable>
           </View>
-          <View style={styles.buttonAdd}>
-            <Pressable
-              style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-              onPress={modalVisibilityHandler}
-              android_ripple={{ color: "#ccc" }}
-            >
-              <View style={styles.textButtonContainer}>
-                <Text style={styles.addText}>Add</Text>
-              </View>
-            </Pressable>
-          </View>
+          <ButtonBackground text={"Add"} onPress={AddModalHandler} style={{ marginLeft: 10 }} />
         </View>
-      </View>
+        <ModalAlert
+          addItemHandler={addItemHandler}
+          visibleAlert={AlertVisibility}
+          setVisibleAlert={setAvertVisibility}
+          setModal={setModal}
+        />
+      </SafeAreaView>
     </Modal>
   );
 }
@@ -65,16 +71,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     margin: 20,
   },
-  buttonAdd: {
-    height: 35,
-    width: 130,
-    backgroundColor: "#3618B9",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 5,
-    overflow: "hidden",
-    marginLeft: 5,
-  },
   buttonCancel: {
     height: 35,
     width: 130,
@@ -84,9 +80,6 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     color: "#6451a9",
-  },
-  addText: {
-    color: "white",
   },
   pressed: {
     opacity: 0.5,

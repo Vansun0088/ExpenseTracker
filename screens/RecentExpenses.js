@@ -1,15 +1,15 @@
 import { useLayoutEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 
-import ExpensesList from "../components/ExpensesList";
 import IconButton from "../components/IconButton";
-import ModalScreen from "../components/ModalScreen";
+import ModalScreen from "../components/ModalAsp/ModalScreen";
 import TotalForm from "../components/TotalForm";
+import ListItem from "../components/ListItem";
 
 function RecentExpenses({ navigation }) {
   const [modalVisibility, setModalVisibility] = useState(false);
-  const [summary, setSummary] = useState(0);
+  const [expensesList, setExpensesList] = useState([]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -28,17 +28,44 @@ function RecentExpenses({ navigation }) {
     });
   }, []);
 
+  function addItemHandler(enteredItem, enteredPrice) {
+    setExpensesList((items) => [
+      ...items,
+      { text: enteredItem, price: enteredPrice, id: Math.random().toString(), date: "2022.28.10" },
+    ]);
+  }
+
   function plusHandler() {
     setModalVisibility(true);
   }
 
+  function onDeleteItem(id) {
+    setExpensesList((items) => items.filter((item) => item.id !== id));
+  }
+
   return (
     <View style={styles.rootContainer}>
-      <TotalForm text={"Last 7 Days"} />
-      <View>
-        <ExpensesList />
-      </View>
-      <ModalScreen setModal={setModalVisibility} modal={modalVisibility} />
+      <TotalForm data={expensesList} text={"Last 7 Days"} />
+      <FlatList
+        style={styles.list}
+        data={expensesList}
+        renderItem={({ item }) => {
+          return (
+            <ListItem
+              item={item.text}
+              price={Number(item.price).toFixed(2)}
+              id={item.id}
+              date={item.date}
+              onDelete={onDeleteItem}
+            />
+          );
+        }}
+      />
+      <ModalScreen
+        setModal={setModalVisibility}
+        modal={modalVisibility}
+        addItemHandler={addItemHandler}
+      />
     </View>
   );
 }
@@ -54,25 +81,10 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   plus: {
-    marginRight: "10%",
+    marginRight: 20,
   },
-  summaryContainer: {
+  list: {
     width: "100%",
-    height: 40,
-    backgroundColor: "#C0B8D8",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderRadius: 7,
-    paddingHorizontal: 10,
-  },
-  summaryText: {
-    color: "#5d3ea7",
-    fontWeight: "bold",
-  },
-  summaryCount: {
-    color: "#3F2B7C",
-    fontSize: 20,
-    fontWeight: "bold",
+    marginVertical: 20,
   },
 });

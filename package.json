@@ -8,13 +8,14 @@
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
-   "resolutions": {
+  "resolutions": {
     "react-native-reanimated": "2.9.1"
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^4.4.5",
     "@react-navigation/bottom-tabs": "^6.4.0",
     "@react-navigation/native": "^6.0.13",
+    "@react-navigation/native-stack": "^6.9.1",
     "expo": "~46.0.16",
     "expo-status-bar": "~1.4.0",
     "react": "18.0.0",

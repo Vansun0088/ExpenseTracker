@@ -1,13 +1,14 @@
 import { View, Text, StyleSheet } from "react-native";
-import { useState } from "react";
 
-function TotalForm({ text }) {
-  const [summary, setSummary] = useState(0);
+function TotalForm({ text, data }) {
+  const expensesSum = data.reduce((sum, expense) => {
+    return sum + expense.price;
+  }, 0);
 
   return (
     <View style={styles.summaryContainer}>
       <Text style={styles.summaryText}>{text}</Text>
-      <Text style={styles.summaryCount}>${summary}</Text>
+      <Text style={styles.summaryCount}>${expensesSum.toFixed(2)}</Text>
     </View>
   );
 }
@@ -28,6 +29,7 @@ const styles = StyleSheet.create({
   summaryText: {
     color: "#5d3ea7",
     fontWeight: "bold",
+    fontSize: 20,
   },
   summaryCount: {
     color: "#3F2B7C",

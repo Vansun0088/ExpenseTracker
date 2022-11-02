@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Entypo } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -20,7 +20,7 @@ export default function App() {
           screenOptions={{
             tabBarActiveTintColor: "#EBB339",
             tabBarInactiveTintColor: "#807599",
-            tabBarStyle: { backgroundColor: "#3018A2" },
+            tabBarStyle: { backgroundColor: "#351bb3" },
             tabBarLabelStyle: { fontSize: 12 },
             headerStyle: { backgroundColor: "#351bb3" },
             headerTintColor: "white",
@@ -53,5 +53,3 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({});
