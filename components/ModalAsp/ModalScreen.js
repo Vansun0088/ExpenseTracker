@@ -1,47 +1,78 @@
-import { Pressable, View, StyleSheet, Modal, Text, SafeAreaView } from "react-native";
-import { useState } from "react";
+import { Pressable, View, StyleSheet, Text } from "react-native";
+import { useContext, useLayoutEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 
 import ModalAlert from "./ModalAlert";
+import IconButton from "../IconButton";
 import ButtonBackground from "../Styles/ButtonBackground";
+import { ListContext } from "../../store/context/list-context";
+import { colors } from "../../constants/colors";
 
-function ModalScreen({ setModal, modal, addItemHandler }) {
-  const [AlertVisibility, setAvertVisibility] = useState("none");
+function ModalScreen({ navigation, route }) {
+  const expensesCtx = useContext(ListContext);
+  const [AlertVisibility, setAlertVisibility] = useState("none");
+  const expenseId = route.params?.expenseId;
+  const expenseItem = route.params?.expenseItem;
+  const expensePrice = route.params?.expensePrice;
+  const isEditing = !!expenseId;
 
-  function CancelModalHandler() {
-    setModal(false);
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: isEditing ? "Edit Expense" : "Add Expense",
+    });
+  });
+
+  function ModalHandler() {
+    setAlertVisibility("flex");
   }
 
-  function AddModalHandler() {
-    setAvertVisibility("flex");
+  function DeleteHandler() {
+    expensesCtx.deleteExpense(expenseId);
+    navigation.goBack();
+  }
+
+  function CancelHandler() {
+    navigation.goBack();
   }
 
   return (
-    <Modal animationType="slide" visible={modal}>
-      <SafeAreaView style={styles.rootContainer}>
-        <View style={styles.lineContainer}>
-          <Text style={styles.lineText}>Add Expense</Text>
+    <View style={styles.rootContainer}>
+      <View style={styles.buttonsContainer}>
+        <View style={styles.buttonCancel}>
+          <Pressable
+            onPress={CancelHandler}
+            style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+          >
+            <View style={styles.textButtonContainer}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </View>
+          </Pressable>
         </View>
-        <View style={styles.buttonsContainer}>
-          <View style={styles.buttonCancel}>
-            <Pressable
-              style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-              onPress={CancelModalHandler}
-            >
-              <View style={styles.textButtonContainer}>
-                <Text style={styles.cancelText}>Cancel</Text>
-              </View>
-            </Pressable>
-          </View>
-          <ButtonBackground text={"Add"} onPress={AddModalHandler} style={{ marginLeft: 10 }} />
-        </View>
-        <ModalAlert
-          addItemHandler={addItemHandler}
-          visibleAlert={AlertVisibility}
-          setVisibleAlert={setAvertVisibility}
-          setModal={setModal}
+        <ButtonBackground
+          text={isEditing ? "Update" : "Add"}
+          onPress={ModalHandler}
+          style={{ marginLeft: 10 }}
         />
-      </SafeAreaView>
-    </Modal>
+      </View>
+      {isEditing && (
+        <View style={styles.deleteContainer}>
+          <IconButton
+            onPress={DeleteHandler}
+            icon={"trash"}
+            Family={Ionicons}
+            color={colors.cancelColor}
+            size={36}
+          />
+        </View>
+      )}
+      <ModalAlert
+        item={expenseItem}
+        price={expensePrice}
+        id={expenseId}
+        isEditing={isEditing}
+        visibleAlert={AlertVisibility}
+      />
+    </View>
   );
 }
 
@@ -50,21 +81,7 @@ export default ModalScreen;
 const styles = StyleSheet.create({
   rootContainer: {
     flex: 1,
-    backgroundColor: "#1D0C57",
-  },
-  lineContainer: {
-    width: "100%",
-    height: 50,
-    backgroundColor: "#3618B9",
-    alignItems: "center",
-    justifyContent: "center",
-    borderTopWidth: 2,
-    borderColor: "black",
-  },
-  lineText: {
-    fontWeight: "bold",
-    color: "white",
-    fontSize: 18,
+    backgroundColor: colors.modalColor,
   },
   buttonsContainer: {
     flexDirection: "row",
@@ -79,7 +96,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   cancelText: {
-    color: "#6451a9",
+    color: colors.buttonAddEdit,
   },
   pressed: {
     opacity: 0.5,
@@ -94,5 +111,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flex: 1,
     borderRadius: 5,
+  },
+  deleteContainer: {
+    marginTop: 16,
+    paddingTop: 8,
+    borderTopWidth: 2,
+    borderTopColor: "#ffffff6a",
+    alignItems: "center",
+    alignSelf: "center",
+    width: "80%",
   },
 });

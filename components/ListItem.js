@@ -1,12 +1,23 @@
+import { useNavigation } from "@react-navigation/native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-function ListItem({ item, price, id, date, onDelete }) {
+function ListItem({ item, price, date, id }) {
+  const navigation = useNavigation();
+
+  function itemPressHandler() {
+    navigation.navigate("Modal", {
+      expenseId: id,
+      expensePrice: price,
+      expenseItem: item,
+    });
+  }
+
   return (
     <View style={styles.rootContainer}>
       <Pressable
         style={({ pressed }) => pressed && styles.pressed}
         android_ripple={{ color: "#ccc" }}
-        onPress={onDelete.bind(this, id)}
+        onPress={itemPressHandler}
       >
         <View style={styles.innerContainer}>
           <View>
@@ -30,6 +41,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#3F04C4",
     borderRadius: 10,
     overflow: "hidden",
+    marginVertical: 8,
   },
   innerContainer: {
     flexDirection: "row",

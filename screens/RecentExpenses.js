@@ -1,70 +1,28 @@
-import { useLayoutEffect, useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { StyleSheet, View } from "react-native";
+import { useContext } from "react";
 
-import IconButton from "../components/IconButton";
-import ModalScreen from "../components/ModalAsp/ModalScreen";
 import TotalForm from "../components/TotalForm";
-import ListItem from "../components/ListItem";
+import ExpensesList from "../components/ExpensesList";
+import { ListContext } from "../store/context/list-context";
+import { colors } from "../constants/colors";
+import { getDateMinusDays } from "../util/date";
 
-function RecentExpenses({ navigation }) {
-  const [modalVisibility, setModalVisibility] = useState(false);
-  const [expensesList, setExpensesList] = useState([]);
+function RecentExpenses() {
+  const listCtx = useContext(ListContext);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => {
-        return (
-          <IconButton
-            onPress={plusHandler}
-            Family={FontAwesome5}
-            icon={"plus"}
-            size={20}
-            color={"white"}
-            style={styles.plus}
-          />
-        );
-      },
-    });
-  }, []);
+  const recentExpenses = listCtx.expenses.filter((expense) => {
+    const today = new Date();
+    const date7DaysAgo = getDateMinusDays(today, 7);
 
-  function addItemHandler(enteredItem, enteredPrice) {
-    setExpensesList((items) => [
-      ...items,
-      { text: enteredItem, price: enteredPrice, id: Math.random().toString(), date: "2022.28.10" },
-    ]);
-  }
-
-  function plusHandler() {
-    setModalVisibility(true);
-  }
-
-  function onDeleteItem(id) {
-    setExpensesList((items) => items.filter((item) => item.id !== id));
-  }
+    return expense.date >= date7DaysAgo && expense.date <= today;
+  });
 
   return (
     <View style={styles.rootContainer}>
-      <TotalForm data={expensesList} text={"Last 7 Days"} />
-      <FlatList
-        style={styles.list}
-        data={expensesList}
-        renderItem={({ item }) => {
-          return (
-            <ListItem
-              item={item.text}
-              price={Number(item.price).toFixed(2)}
-              id={item.id}
-              date={item.date}
-              onDelete={onDeleteItem}
-            />
-          );
-        }}
-      />
-      <ModalScreen
-        setModal={setModalVisibility}
-        modal={modalVisibility}
-        addItemHandler={addItemHandler}
+      <TotalForm data={recentExpenses} text={"Last 7 Days"} />
+      <ExpensesList
+        emptyFallback={"You don't have any expense for 7 days yet("}
+        data={recentExpenses}
       />
     </View>
   );
@@ -75,13 +33,10 @@ export default RecentExpenses;
 const styles = StyleSheet.create({
   rootContainer: {
     flex: 1,
-    backgroundColor: "#2E058A",
+    backgroundColor: colors.contentPurple,
     alignItems: "center",
     paddingHorizontal: "5%",
     paddingVertical: 20,
-  },
-  plus: {
-    marginRight: 20,
   },
   list: {
     width: "100%",

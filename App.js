@@ -4,52 +4,93 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Entypo } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+import { colors } from "./constants/colors";
 import RecentExpenses from "./screens/RecentExpenses";
 import TotalExpenses from "./screens/TotalExpenses";
+import ModalScreen from "./components/ModalAsp/ModalScreen";
+import IconButton from "./components/IconButton";
+import ListContextProvider from "./store/context/list-context";
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
+function TabNavigator() {
+  return (
+    <Tab.Navigator
+      screenOptions={({ navigation }) => ({
+        tabBarActiveTintColor: "#EBB339",
+        tabBarStyle: { backgroundColor: colors.mainPurple },
+        tabBarLabelStyle: { fontSize: 12 },
+        headerStyle: { backgroundColor: colors.mainPurple },
+        headerTintColor: "white",
+        headerRight: () => {
+          return (
+            <IconButton
+              Family={FontAwesome5}
+              icon={"plus"}
+              size={20}
+              color={"white"}
+              onPress={() => {
+                navigation.navigate("Modal");
+              }}
+            />
+          );
+        },
+      })}
+    >
+      <Tab.Screen
+        name="RecentExpenses"
+        component={RecentExpenses}
+        options={{
+          title: "Recent Expenses",
+          tabBarLabel: "Recent",
+          tabBarIcon: ({ size, color }) => {
+            return <Entypo name="time-slot" size={size + 4} color={color} />;
+          },
+        }}
+      />
+      <Tab.Screen
+        name="TotalExpenses"
+        component={TotalExpenses}
+        options={{
+          title: "Total Expenses",
+          tabBarLabel: "Total",
+          tabBarIcon: ({ size, color }) => {
+            return <FontAwesome5 name="shopify" size={size + 4} color={color} />;
+          },
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <ListContextProvider>
       <StatusBar style="light" />
       <NavigationContainer>
-        <Tab.Navigator
+        <Stack.Navigator
           screenOptions={{
-            tabBarActiveTintColor: "#EBB339",
-            tabBarInactiveTintColor: "#807599",
-            tabBarStyle: { backgroundColor: "#351bb3" },
-            tabBarLabelStyle: { fontSize: 12 },
-            headerStyle: { backgroundColor: "#351bb3" },
+            headerStyle: { backgroundColor: colors.mainPurple },
             headerTintColor: "white",
           }}
         >
-          <Tab.Screen
-            name="RecentExpenses"
-            component={RecentExpenses}
+          <Stack.Screen
+            name="TabNavigator"
+            component={TabNavigator}
             options={{
-              title: "Recent Expenses",
-              tabBarIcon: ({ size, color }) => {
-                return <Entypo name="time-slot" size={size + 4} color={color} />;
-              },
-              tabBarLabel: "Recent",
+              headerShown: false,
             }}
           />
-          <Tab.Screen
-            name="TotalExpenses"
-            component={TotalExpenses}
+          <Stack.Screen
+            name="Modal"
+            component={ModalScreen}
             options={{
-              title: "Total Expenses",
-              tabBarIcon: ({ size, color }) => {
-                return <FontAwesome5 name="shopify" size={size + 4} color={color} />;
-              },
-              tabBarLabel: "Total",
+              presentation: "modal",
             }}
           />
-        </Tab.Navigator>
+        </Stack.Navigator>
       </NavigationContainer>
-    </GestureHandlerRootView>
+    </ListContextProvider>
   );
 }

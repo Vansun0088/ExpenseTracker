@@ -1,9 +1,11 @@
-import { Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
-function IconButton({ size, color, icon, style, Family, onPress }) {
+function IconButton({ size, color, icon, Family, onPress }) {
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [style, pressed && styles.pressed]}>
-      <Family name={icon} size={size} color={color} />
+    <Pressable onPress={onPress} style={({ pressed }) => pressed && styles.pressed}>
+      <View style={styles.buttonContainer}>
+        <Family name={icon} size={size} color={color} />
+      </View>
     </Pressable>
   );
 }
@@ -11,6 +13,12 @@ function IconButton({ size, color, icon, style, Family, onPress }) {
 export default IconButton;
 
 const styles = StyleSheet.create({
+  buttonContainer: {
+    borderRadius: 24,
+    padding: 6,
+    marginHorizontal: 8,
+    marginVertical: 2,
+  },
   pressed: {
     opacity: 0.5,
   },

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -9,29 +10,37 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
+
+import { colors } from "../../constants/colors";
+import { ListContext } from "../../store/context/list-context";
+import { getFormattedDate } from "../../util/date";
 import ButtonBackground from "../Styles/ButtonBackground";
 
-const screenHeight = Dimensions.get("window").height;
+const screenHeight = Dimensions.get("screen").height;
 
-function ModalAlert({ setVisibleAlert, visibleAlert, addItemHandler, setModal }) {
-  const [enteredText, setEnteredText] = useState("");
-  const [enteredPrice, setEnteredPrice] = useState(0);
+function ModalAlert({ visibleAlert, isEditing, item, price, id }) {
+  const navigation = useNavigation();
+  const expensesCtx = useContext(ListContext);
+  const [enteredText, setEnteredText] = useState(item);
+  const [enteredPrice, setEnteredPrice] = useState(price);
 
   function addItem() {
-    if (
-      (enteredText.length === 0) & (enteredPrice.length !== 0) ||
-      (enteredText.length !== 0) & (enteredPrice.length === 0)
-    ) {
-      Alert.alert("Error", "Fill both inputs or close", [{ text: "Okay", style: "cancel" }]);
-    } else if (
-      (enteredPrice.length === 0) & (enteredText.length === 0) ||
-      (enteredPrice.length !== 0) & (enteredText.length !== 0)
-    ) {
-      addItemHandler(enteredText, Number(enteredPrice));
-      setModal(false);
-      setVisibleAlert("none");
-      setEnteredText("");
+    if (enteredText) {
+      const object = {
+        text: enteredText,
+        price: enteredPrice,
+        date: getFormattedDate(new Date()),
+      };
+
+      isEditing ? expensesCtx.updateExpense(id, object) : expensesCtx.addExpense(object);
+      navigation.goBack();
+    } else {
+      Alert.alert("'Item Name' cannot be empty", "", [{ text: "Ok" }]);
     }
+  }
+
+  function cancel() {
+    navigation.goBack();
   }
 
   function enterText(enteredText) {
@@ -39,20 +48,21 @@ function ModalAlert({ setVisibleAlert, visibleAlert, addItemHandler, setModal })
   }
 
   function enterPrice(enteredPrice) {
-    const newEnteredPrice = enteredPrice.replace(/,/i, ".");
+    const newEnteredPrice = Number(enteredPrice.replace(/,/i, "."));
     setEnteredPrice(newEnteredPrice);
   }
 
   return (
     <View style={[styles.alertContainer, { display: visibleAlert }]}>
       <ScrollView alwaysBounceVertical={false} style={styles.rootScreen}>
-        <KeyboardAvoidingView behavior="padding" style={styles.rootKeyboard}>
+        <KeyboardAvoidingView behavior="padding" style={styles.rootScreen}>
           <View style={styles.alert}>
             <TextInput
               style={styles.inputText}
               onChangeText={enterText}
-              placeholder="Item name"
+              placeholder="Item Name"
               placeholderTextColor={"#ccc"}
+              value={enteredText}
             />
             <TextInput
               style={styles.inputText}
@@ -60,10 +70,16 @@ function ModalAlert({ setVisibleAlert, visibleAlert, addItemHandler, setModal })
               onChangeText={enterPrice}
               placeholder="Price"
               placeholderTextColor={"#ccc"}
+              value={enteredPrice}
             />
-            <View style={styles.textContainer}>
-              <Text style={styles.text}>Date: 28.10.2022</Text>
-              <ButtonBackground text={"Add/Cancel"} onPress={addItem} style={styles.button} />
+            <Text style={styles.text}>Date: {getFormattedDate(new Date())}</Text>
+            <View style={styles.buttonsContainer}>
+              <ButtonBackground text={"Cancel"} onPress={cancel} style={styles.buttonCancel} />
+              <ButtonBackground
+                text={isEditing ? "Update" : "Add"}
+                onPress={addItem}
+                style={styles.buttonAdd}
+              />
             </View>
           </View>
         </KeyboardAvoidingView>
@@ -79,12 +95,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: screenHeight,
   },
-  rootKeyboard: {
-    width: "100%",
-    height: screenHeight,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   alertContainer: {
     position: "absolute",
     width: "100%",
@@ -92,11 +102,13 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   alert: {
-    backgroundColor: "#3618B9",
-    width: 300,
-    height: 200,
+    backgroundColor: colors.modalAlertColor,
+    width: 320,
+    height: 220,
     borderRadius: 20,
     padding: 20,
+    top: "25%",
+    alignSelf: "center",
   },
   inputText: {
     borderRadius: 5,
@@ -106,14 +118,20 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 10,
   },
-  textContainer: {
+  buttonsContainer: {
+    marginVertical: 5,
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  button: {
-    backgroundColor: "#5236a6",
+  buttonAdd: {
+    backgroundColor: colors.buttonAddEdit,
+  },
+  buttonCancel: {
+    backgroundColor: colors.cancelColor,
   },
   text: {
     color: "white",
+    alignSelf: "center",
+    fontSize: 16,
   },
 });
