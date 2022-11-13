@@ -2,7 +2,6 @@ import { useNavigation } from "@react-navigation/native";
 import { useContext, useState } from "react";
 import {
   View,
-  Text,
   Dimensions,
   TextInput,
   KeyboardAvoidingView,
@@ -18,25 +17,30 @@ import ButtonBackground from "../Styles/ButtonBackground";
 
 const screenHeight = Dimensions.get("screen").height;
 
-function ModalAlert({ visibleAlert, isEditing, item, price, id }) {
+function ModalAlert({ visibleAlert, isEditing, item, price, date, id }) {
   const navigation = useNavigation();
   const expensesCtx = useContext(ListContext);
-  const [enteredText, setEnteredText] = useState(item);
-  const [enteredPrice, setEnteredPrice] = useState(price);
+  const [enteredText, setEnteredText] = useState(isEditing ? item : "");
+  const [enteredPrice, setEnteredPrice] = useState(isEditing ? price.toString() : "");
+  const [enteredDate, setEnteredDate] = useState(isEditing ? getFormattedDate(date) : "");
 
   function addItem() {
-    if (enteredText) {
-      const object = {
-        text: enteredText,
-        price: enteredPrice,
-        date: getFormattedDate(new Date()),
-      };
+    const object = {
+      text: enteredText,
+      price: +enteredPrice.replace(/,/i, "."),
+      date: new Date(enteredDate),
+    };
 
-      isEditing ? expensesCtx.updateExpense(id, object) : expensesCtx.addExpense(object);
-      navigation.goBack();
-    } else {
-      Alert.alert("'Item Name' cannot be empty", "", [{ text: "Ok" }]);
+    const textIsValid = object.text.trim().length > 0;
+    const priceIsValid = !isNaN(object.price) && object.price >= 0;
+    const dateIsValid = object.date.toString() !== "Invalid Date";
+
+    if (!textIsValid || !dateIsValid || !priceIsValid) {
+      Alert.alert("Invalid input!", "Please check your input values");
+      return;
     }
+    isEditing ? expensesCtx.updateExpense(id, object) : expensesCtx.addExpense(object);
+    navigation.goBack();
   }
 
   function cancel() {
@@ -48,8 +52,11 @@ function ModalAlert({ visibleAlert, isEditing, item, price, id }) {
   }
 
   function enterPrice(enteredPrice) {
-    const newEnteredPrice = Number(enteredPrice.replace(/,/i, "."));
-    setEnteredPrice(newEnteredPrice);
+    setEnteredPrice(enteredPrice);
+  }
+
+  function enterDate(enteredDate) {
+    setEnteredDate(enteredDate);
   }
 
   return (
@@ -59,20 +66,24 @@ function ModalAlert({ visibleAlert, isEditing, item, price, id }) {
           <View style={styles.alert}>
             <TextInput
               style={styles.inputText}
-              onChangeText={enterText}
-              placeholder="Item Name"
-              placeholderTextColor={"#ccc"}
-              value={enteredText}
-            />
-            <TextInput
-              style={styles.inputText}
               keyboardType={"numeric"}
               onChangeText={enterPrice}
               placeholder="Price"
-              placeholderTextColor={"#ccc"}
               value={enteredPrice}
             />
-            <Text style={styles.text}>Date: {getFormattedDate(new Date())}</Text>
+            <TextInput
+              style={styles.inputText}
+              onChangeText={enterDate}
+              placeholder="YYYY-MM-DD"
+              maxLength={10}
+              value={enteredDate}
+            />
+            <TextInput
+              style={styles.inputText}
+              onChangeText={enterText}
+              placeholder="Item Name"
+              value={enteredText}
+            />
             <View style={styles.buttonsContainer}>
               <ButtonBackground text={"Cancel"} onPress={cancel} style={styles.buttonCancel} />
               <ButtonBackground
@@ -103,8 +114,7 @@ const styles = StyleSheet.create({
   },
   alert: {
     backgroundColor: colors.modalAlertColor,
-    width: 320,
-    height: 220,
+    width: "80%",
     borderRadius: 20,
     padding: 20,
     top: "25%",

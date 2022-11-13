@@ -11,9 +11,11 @@ import { colors } from "../../constants/colors";
 function ModalScreen({ navigation, route }) {
   const expensesCtx = useContext(ListContext);
   const [AlertVisibility, setAlertVisibility] = useState("none");
+
   const expenseId = route.params?.expenseId;
   const expenseItem = route.params?.expenseItem;
   const expensePrice = route.params?.expensePrice;
+  const expenseDate = route.params?.expenseDate;
   const isEditing = !!expenseId;
 
   useLayoutEffect(() => {
@@ -67,8 +69,9 @@ function ModalScreen({ navigation, route }) {
       )}
       <ModalAlert
         item={expenseItem}
-        price={expensePrice}
         id={expenseId}
+        price={expensePrice}
+        date={expenseDate}
         isEditing={isEditing}
         visibleAlert={AlertVisibility}
       />

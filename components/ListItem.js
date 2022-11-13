@@ -1,5 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { getFormattedDate } from "../util/date";
 
 function ListItem({ item, price, date, id }) {
   const navigation = useNavigation();
@@ -9,6 +10,7 @@ function ListItem({ item, price, date, id }) {
       expenseId: id,
       expensePrice: price,
       expenseItem: item,
+      expenseDate: date,
     });
   }
 
@@ -22,7 +24,7 @@ function ListItem({ item, price, date, id }) {
         <View style={styles.innerContainer}>
           <View>
             <Text style={styles.textItem}>{item}</Text>
-            <Text style={styles.textDate}>{date}</Text>
+            <Text style={styles.textDate}>{getFormattedDate(date)}</Text>
           </View>
           <View style={styles.priceContainer}>
             <Text style={styles.priceText}>{price}</Text>
