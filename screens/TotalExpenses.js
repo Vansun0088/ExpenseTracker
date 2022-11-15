@@ -1,13 +1,30 @@
 import { StyleSheet, View } from "react-native";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import TotalForm from "../components/TotalForm";
 import ExpensesList from "../components/ExpensesList";
 import { ListContext } from "../store/context/list-context";
 import { colors } from "../constants/colors";
+import { fetchExpenses } from "../util/http";
+import LoadingOverlay from "../components/Styles/LoadingOverlay";
 
 function TotalExpenses() {
+  const [isFetching, setIsFetchingState] = useState(true);
   const listCtx = useContext(ListContext);
+
+  useEffect(() => {
+    async function getExpenses() {
+      setIsFetchingState(true);
+      const expenses = await fetchExpenses();
+      setIsFetchingState(false);
+      listCtx.setExpenses(expenses);
+    }
+    getExpenses();
+  }, []);
+
+  if (isFetching) {
+    return <LoadingOverlay />;
+  }
 
   return (
     <View style={styles.rootContainer}>

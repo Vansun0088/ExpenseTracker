@@ -7,8 +7,13 @@ import IconButton from "../IconButton";
 import ButtonBackground from "../Styles/ButtonBackground";
 import { ListContext } from "../../store/context/list-context";
 import { colors } from "../../constants/colors";
+import { deleteExpense } from "../../util/http";
+import LoadingOverlay from "../Styles/LoadingOverlay";
+import ErrorOverlay from "../Styles/ErrorOverlay";
 
 function ModalScreen({ navigation, route }) {
+  const [isFetching, setIsFetchingState] = useState(false);
+  const [error, setError] = useState();
   const expensesCtx = useContext(ListContext);
   const [AlertVisibility, setAlertVisibility] = useState("none");
 
@@ -28,13 +33,29 @@ function ModalScreen({ navigation, route }) {
     setAlertVisibility("flex");
   }
 
-  function DeleteHandler() {
-    expensesCtx.deleteExpense(expenseId);
-    navigation.goBack();
+  async function DeleteHandler() {
+    setIsFetchingState(true);
+    try {
+      expensesCtx.deleteExpense(expenseId);
+      await deleteExpense(expenseId);
+      navigation.goBack();
+    } catch (error) {
+      setError("Could not delete expense!");
+      setIsFetchingState(false);
+    }
   }
 
   function CancelHandler() {
     navigation.goBack();
+  }
+
+  if (error && !isFetching) {
+    // isFetching почему он не равняется true
+    return <ErrorOverlay massage={error} onConfirm={CancelHandler} />;
+  }
+
+  if (isFetching) {
+    return <LoadingOverlay />;
   }
 
   return (
@@ -68,6 +89,8 @@ function ModalScreen({ navigation, route }) {
         </View>
       )}
       <ModalAlert
+        setLoading={setIsFetchingState}
+        setError={setError}
         item={expenseItem}
         id={expenseId}
         price={expensePrice}

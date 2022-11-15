@@ -13,13 +13,15 @@ import {
 import { colors } from "../../constants/colors";
 import { ListContext } from "../../store/context/list-context";
 import { getFormattedDate } from "../../util/date";
+import { storeExpense, updateExpense } from "../../util/http";
 import ButtonBackground from "../Styles/ButtonBackground";
+import LoadingOverlay from "../Styles/LoadingOverlay";
 
 const screenHeight = Dimensions.get("screen").height;
 
-function ModalAlert({ visibleAlert, isEditing, item, price, date, id }) {
+function ModalAlert({ visibleAlert, isEditing, item, price, date, id, setLoading, setError }) {
   const navigation = useNavigation();
-  const expensesCtx = useContext(ListContext);
+  const listCtx = useContext(ListContext);
   const [enteredText, setEnteredText] = useState(isEditing ? item : "");
   const [enteredPrice, setEnteredPrice] = useState(isEditing ? price.toString() : "");
   const [enteredDate, setEnteredDate] = useState(isEditing ? getFormattedDate(date) : "");
@@ -39,8 +41,24 @@ function ModalAlert({ visibleAlert, isEditing, item, price, date, id }) {
       Alert.alert("Invalid input!", "Please check your input values");
       return;
     }
-    isEditing ? expensesCtx.updateExpense(id, object) : expensesCtx.addExpense(object);
-    navigation.goBack();
+    async function confirmHandler() {
+      visibleAlert = "none";
+      setLoading(true);
+      try {
+        if (isEditing) {
+          listCtx.updateExpense(id, object);
+          await updateExpense(id, object);
+        } else {
+          const id = await storeExpense(object);
+          listCtx.addExpense({ ...object, id: id });
+        }
+        navigation.goBack();
+      } catch (error) {
+        setError("Could not " + (isEditing ? "update expense!" : "add expense"));
+        setLoading(false);
+      }
+    }
+    confirmHandler();
   }
 
   function cancel() {
